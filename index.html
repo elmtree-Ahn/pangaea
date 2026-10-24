@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>대륙 이동 증거 찾기 | 어게인 실험과학 수학학원</title>
+<meta name="description" content="손으로 대륙을 모으며 알아보는 판게아와 대륙 이동의 증거 4가지">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#fffaf0; --sea:#cfeaf8; --sea2:#a9d8f2; --blue:#3a9ae0; --blue-d:#2476b8;
+  --sand2:#ffd666; --sand-d:#e0b52e; --mint-d:#3fae80;
+  --ink:#33414f; --sub:#6c7a8a; --line:#e6dcc4; --ok:#2fb36b; --coral:#ff8a7a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif;font-weight:500}
+body{min-height:100vh;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+
+.bbtn{font-family:"Jua",sans-serif;font-size:22px;min-height:60px;padding:10px 28px;color:#fff;background:var(--blue);border-radius:999px;
+  box-shadow:inset 0 -6px 0 rgba(0,0,0,.12),0 5px 0 var(--blue-d);word-break:keep-all;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.bbtn:active{transform:translateY(3px)}
+.bbtn.sand{background:var(--sand2);color:#5a4300;box-shadow:inset 0 -6px 0 rgba(0,0,0,.08),0 5px 0 var(--sand-d)}
+.bbtn[hidden]{display:none}
+
+header{position:sticky;top:0;z-index:30;background:#fff;box-shadow:0 3px 0 var(--line);padding:10px 16px}
+.head-in{max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.titles{flex:1;min-width:0}
+.titles .brand{font-family:"Jua",sans-serif;font-size:15px;color:var(--sub)}
+.titles h1{margin:0;font-family:"Jua",sans-serif;font-weight:400;font-size:clamp(24px,4vw,34px);color:var(--blue);line-height:1.1}
+.share{font-size:19px;min-height:54px;padding:8px 22px}
+
+nav{max-width:1000px;width:100%;margin:14px auto 0;padding:0 16px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.tab{min-height:66px;border-radius:20px;background:#fff;font-family:"Jua",sans-serif;font-size:clamp(15px,2vw,19px);line-height:1.2;padding:6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:3px solid transparent;box-shadow:0 3px 0 var(--line);word-break:keep-all}
+.tab .n{width:26px;height:26px;border-radius:50%;background:var(--sea);color:var(--blue-d);display:grid;place-items:center;font-size:15px}
+.tab.on{border-color:var(--blue);color:var(--blue-d)}
+.tab.done .n{background:var(--ok);color:#fff}
+.tab.done .n::after{content:"✓"}
+.tab.done .n span{display:none}
+
+main{flex:1;max-width:1000px;width:100%;margin:0 auto;padding:14px 16px 24px}
+.coach{font-family:"Jua",sans-serif;font-size:clamp(19px,2.6vw,24px);line-height:1.4;background:#fff;border-radius:22px;padding:14px 18px;box-shadow:0 3px 0 var(--line);word-break:keep-all}
+.coach b{color:var(--blue-d);font-weight:400}
+
+.stage{position:relative;margin-top:12px;background:var(--sea);border-radius:26px;overflow:hidden;box-shadow:inset 0 0 0 4px var(--sea2)}
+svg#map{display:block;width:100%;height:auto;touch-action:none}
+.cont{transition:transform 1.4s cubic-bezier(.5,0,.3,1);transform-box:view-box}
+.cont.drag{transition:none}
+.cont path.land{stroke:rgba(51,65,79,.55);stroke-width:3;stroke-linejoin:round}
+.cont text{font-family:"Jua",sans-serif;font-size:22px;fill:#33414f;text-anchor:middle;dominant-baseline:middle;pointer-events:none}
+.cont text.small{font-size:17px}
+.layer{opacity:0;transition:opacity .5s;pointer-events:none}
+.show-fossil .fossil,.show-mount .mount,.show-ice .ice{opacity:1}
+#sa.grab{cursor:grab}
+#sa.grab path.land{stroke:#2476b8;stroke-width:6;stroke-dasharray:14 8;animation:march 1s linear infinite}
+@keyframes march{to{stroke-dashoffset:-22}}
+#icecap{opacity:0;transition:opacity 1s .9s;pointer-events:none}
+.ice-done #icecap{opacity:1}
+.hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:rgba(255,255,255,.92);border-radius:999px;padding:6px 16px;font-family:"Jua",sans-serif;font-size:18px;white-space:nowrap}
+
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.card{margin-top:16px;background:#fff;border:4px solid var(--ok);border-radius:24px;padding:16px 20px;font-size:clamp(17px,2.3vw,21px);line-height:1.6;word-break:keep-all;display:none}
+.card.on{display:block;animation:pop .5s}
+.card h3{margin:0 0 6px;font-family:"Jua",sans-serif;font-weight:400;font-size:clamp(22px,3vw,28px);color:var(--ok)}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:none;opacity:1}}
+
+#quiz{display:none}
+.q{background:#fff;border-radius:24px;padding:18px;box-shadow:0 3px 0 var(--line);margin-top:12px}
+.q h3{margin:0 0 12px;font-family:"Jua",sans-serif;font-weight:400;font-size:clamp(21px,2.8vw,26px);line-height:1.4;word-break:keep-all}
+.opts{display:grid;gap:10px}
+.opt{min-height:60px;border-radius:18px;background:var(--cream);border:3px solid var(--line);font-size:clamp(17px,2.3vw,20px);font-weight:700;padding:8px 14px;text-align:left;word-break:keep-all}
+.opt.right{background:#e3f7ec;border-color:var(--ok)}
+.opt.wrong{background:#ffe9e5;border-color:var(--coral);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.why{margin-top:10px;color:var(--ok);font-weight:700;display:none;word-break:keep-all}
+.why.on{display:block}
+#score{text-align:center;font-family:"Jua",sans-serif;font-size:26px;margin-top:18px;display:none}
+
+footer{background:#fff;box-shadow:0 -3px 0 var(--line);padding:14px 16px;text-align:center;font-family:"Jua",sans-serif;color:var(--sub);font-size:16px;line-height:1.6}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;border-radius:999px;padding:12px 24px;font-family:"Jua",sans-serif;font-size:19px;transition:transform .3s;z-index:50}
+.toast.on{transform:translateX(-50%)}
+canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
+@media (max-width:560px){
+  nav{gap:5px}.tab{min-height:58px;border-radius:14px}
+  .share{padding:8px 14px;font-size:16px;min-height:48px}
+  .hint{font-size:15px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-in">
+    <div class="titles">
+      <div class="brand">어게인 실험과학 수학학원</div>
+      <h1>대륙 이동 증거 찾기</h1>
+    </div>
+    <button class="bbtn sand share" id="share">공유하기</button>
+  </div>
+</header>
+
+<nav id="tabs">
+  <button class="tab on" data-i="0"><span class="n"><span>1</span></span>해안선</button>
+  <button class="tab" data-i="1"><span class="n"><span>2</span></span>화석</button>
+  <button class="tab" data-i="2"><span class="n"><span>3</span></span>산맥</button>
+  <button class="tab" data-i="3"><span class="n"><span>4</span></span>빙하</button>
+  <button class="tab" data-i="4"><span class="n"><span>5</span></span>퀴즈</button>
+</nav>
+
+<main>
+  <div class="coach" id="coach"></div>
+
+  <div id="play">
+    <div class="stage" id="stage">
+      <svg id="map" viewBox="0 0 1000 660" aria-label="세계 지도">
+        <defs id="defs"></defs>
+        <g id="conts"></g>
+        <g id="icecap">
+          <circle cx="585" cy="470" r="68" fill="#fff" opacity=".85" stroke="#7cc4ec" stroke-width="5" stroke-dasharray="12 8"/>
+          <text x="585" y="470" font-family="Jua" font-size="24" fill="#2476b8" text-anchor="middle" dominant-baseline="middle">큰 빙하</text>
+        </g>
+      </svg>
+      <div class="hint" id="hint"></div>
+    </div>
+    <div class="row">
+      <button class="bbtn" id="go">대륙 모으기</button>
+      <button class="bbtn sand" id="reset">처음으로</button>
+    </div>
+    <div class="card" id="card"></div>
+  </div>
+
+  <div id="quiz"></div>
+  <div id="score"></div>
+</main>
+
+<footer>어게인 실험과학 수학학원<br>교육문의 010.2976.5774</footer>
+<div class="toast" id="toast"></div>
+<canvas id="fx"></canvas>
+
+<script>
+const $ = s => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+
+// 대륙 모양은 판게아 자리(좌표 그대로)로 그리고, 지금 모습은 옮기기·돌리기로 만든다.
+// 붙어 있던 변은 같은 점을 같이 써서, 모으면 퍼즐처럼 딱 맞는다.
+const C = {
+  na: { name: '북아메리카', at: [330, 150], color: '#f6b26b', now: [-150, 20, -8],
+        pts: [[230,60],[330,40],[430,50],[480,80],[470,130],[478,180],[430,212],[390,228],[355,255],[330,250],[300,210],[250,180],[210,130]] },
+  sa: { name: '남아메리카', at: [415, 290], color: '#9fd18b', now: [-130, 90, 0],
+        pts: [[395,255],[440,245],[470,262],[478,300],[470,340],[480,390],[500,440],[470,490],[430,525],[405,500],[390,440],[365,360],[355,300]] },
+  eu: { name: '유럽', at: [552, 145], color: '#b4a7e5', now: [30, -10, 0],
+        pts: [[480,80],[530,60],[590,70],[600,120],[580,170],[520,190],[478,180],[470,130]] },
+  as: { name: '아시아', at: [720, 125], color: '#f9d77e', now: [40, 0, 0],
+        pts: [[590,70],[680,40],[800,50],[860,100],[840,170],[760,200],[680,210],[620,190],[580,170],[600,120]] },
+  af: { name: '아프리카', at: [540, 300], color: '#f4a582', now: [20, 10, 0],
+        pts: [[430,212],[478,180],[520,190],[580,170],[620,190],[645,215],[665,225],[640,270],[615,330],[590,400],[560,460],[520,470],[500,440],[480,390],[470,340],[478,300],[470,262],[440,245]] },
+  in: { name: '인도', at: [638, 375], color: '#f9d77e', now: [90, -70, 0], small: true,
+        pts: [[655,300],[615,330],[590,400],[620,440],[660,430],[685,365]] },
+  au: { name: '오스트레일리아', at: [762, 448], color: '#ffe599', now: [150, 0, 0], small: true,
+        pts: [[690,460],[700,420],[760,400],[820,420],[830,470],[790,500],[740,480]] },
+  an: { name: '남극', at: [620, 540], color: '#ffffff', now: [0, 60, 0],
+        pts: [[480,500],[520,470],[560,460],[620,470],[690,460],[740,480],[760,530],[700,580],[580,590],[500,570],[470,540]] },
+};
+const d = pts => 'M' + pts.map(p => p.join(',')).join('L') + 'Z';
+
+// 증거 그림 (판게아 좌표). 대륙마다 자기 땅 안쪽만 보이게 잘라서, 떨어져 있으면 끊기고 모이면 이어진다.
+function evidence(g, k) {
+  const clip = `url(#clip-${k})`;
+  // 화석 : 메소사우루스 (남아메리카 · 아프리카)
+  if (k === 'sa' || k === 'af') {
+    const f = el('g', { class: 'layer fossil', 'clip-path': clip });
+    f.append(el('rect', { x: 395, y: 320, width: 130, height: 80, rx: 30, fill: '#2fb36b', opacity: .35 }));
+    for (const [x, y] of [[418, 345], [432, 385], [478, 340], [500, 383]]) f.append(lizard(x, y));
+    g.append(f);
+  }
+  // 산맥 : 북아메리카 · 유럽
+  if (k === 'na' || k === 'eu') {
+    const m = el('g', { class: 'layer mount', 'clip-path': clip });
+    m.append(el('path', { d: 'M420,220 L470,150 L500,110 L545,72', stroke: '#8a5a2b', 'stroke-width': 26, 'stroke-linecap': 'round', fill: 'none', opacity: .45 }));
+    for (let t = 0; t <= 1.001; t += 1 / 7) {
+      const x = 420 + 125 * t, y = 220 - 148 * t;
+      m.append(el('path', { d: `M${x - 13},${y + 10} L${x},${y - 14} L${x + 13},${y + 10}Z`, fill: '#8a5a2b', stroke: '#fff', 'stroke-width': 2 }));
+    }
+    g.append(m);
+  }
+  // 빙하 자국 : 남쪽 대륙들 (모으면 한 점에서 퍼져 나간 모양)
+  if (['sa', 'af', 'in', 'au', 'an'].includes(k)) {
+    const ic = el('g', { class: 'layer ice', 'clip-path': clip });
+    const cx = 585, cy = 470;
+    for (let a = 0; a < 360; a += 18) {
+      const r = a * Math.PI / 180;
+      const x1 = cx + Math.cos(r) * 70, y1 = cy + Math.sin(r) * 70, x2 = cx + Math.cos(r) * 140, y2 = cy + Math.sin(r) * 140;
+      ic.append(el('line', { x1, y1, x2, y2, stroke: '#2476b8', 'stroke-width': 6, 'stroke-linecap': 'round', 'stroke-dasharray': '12 9' }));
+      const hx = x2 - Math.cos(r) * 14, hy = y2 - Math.sin(r) * 14, px = -Math.sin(r) * 9, py = Math.cos(r) * 9;
+      ic.append(el('path', { d: `M${x2},${y2} L${hx + px},${hy + py} L${hx - px},${hy - py}Z`, fill: '#2476b8' }));
+    }
+    g.append(ic);
+  }
+}
+function lizard(x, y) {
+  const g = el('g', { transform: `translate(${x},${y})` });
+  g.append(el('path', { d: 'M-18,0 Q-6,-7 8,-3 Q16,-1 20,-4 Q16,3 8,3 Q-6,6 -18,0Z', fill: '#1f6e45' }));
+  g.append(el('path', { d: 'M-4,2 l-4,7 M4,2 l4,7 M-4,-3 l-4,-6 M4,-3 l4,-6', stroke: '#1f6e45', 'stroke-width': 2.5, 'stroke-linecap': 'round' }));
+  return g;
+}
+function el(tag, attrs = {}) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+
+const conts = $('#conts'), defs = $('#defs');
+for (const k of ['an', 'au', 'in', 'as', 'eu', 'af', 'na', 'sa']) {
+  const c = C[k];
+  const cp = el('clipPath', { id: 'clip-' + k }); cp.append(el('path', { d: d(c.pts) })); defs.append(cp);
+  const g = el('g', { class: 'cont', id: k });
+  g.append(el('path', { class: 'land', d: d(c.pts), fill: c.color }));
+  evidence(g, k);
+  const t = el('text', { x: c.at[0], y: c.at[1] }); if (c.small) t.setAttribute('class', 'small'); t.textContent = c.name; g.append(t);
+  conts.append(g); c.g = g;
+}
+function place(k, x, y, r = 0) { C[k].g.style.transform = `translate(${x}px,${y}px) rotate(${r}deg)`; C[k].pos = [x, y]; }
+function setAll(together) { for (const k in C) together ? place(k, 0, 0) : place(k, ...C[k].now); }
+
+// ── 소리 · 반짝이 ──
+let ac;
+function tone(f, dur = .15, at = 0, v = .18) {
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + at;
+    o.frequency.value = f; o.type = 'triangle'; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur);
+  } catch (e) {}
+}
+const sfx = { good: () => { tone(660); tone(880, .2, .1); }, bad: () => tone(200, .25), win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .25, i * .11)) };
+const cv = $('#fx'), cx = cv.getContext('2d'); let bits = [];
+function resizeFx() { cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio; }
+addEventListener('resize', resizeFx); resizeFx();
+function confetti() {
+  const cols = ['#3a9ae0', '#ffd666', '#ff8a7a', '#2fb36b', '#b4a7e5'];
+  for (let i = 0; i < 90; i++) bits.push({ x: Math.random() * cv.width, y: -20, vx: (Math.random() - .5) * 4, vy: 2 + Math.random() * 5, s: 6 + Math.random() * 8, c: cols[i % 5], r: Math.random() * 6 });
+  if (bits.length === 90) requestAnimationFrame(fxLoop);
+}
+function fxLoop() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+  bits = bits.filter(b => b.y < cv.height + 20);
+  for (const b of bits) { b.x += b.vx; b.y += b.vy * devicePixelRatio; b.r += .1; cx.save(); cx.translate(b.x, b.y); cx.rotate(b.r); cx.fillStyle = b.c; cx.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2); cx.restore(); }
+  if (bits.length) requestAnimationFrame(fxLoop);
+}
+function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 2000); }
+
+// ── 공유하기 ──
+$('#share').onclick = async () => {
+  const url = location.href.split('#')[0];
+  if (navigator.share) { try { await navigator.share({ title: '대륙 이동 증거 찾기', text: '어게인 실험과학 수학학원 · 대륙 이동 증거 찾기', url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(url); } catch (e) { const t = document.createElement('textarea'); t.value = url; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); }
+  toast('주소가 복사됐어요');
+};
+
+// ── 증거 4가지 ──
+const STEPS = [
+  { layer: '', coach: '<b>증거 1 · 해안선</b><br>초록색 <b>남아메리카</b>를 손가락으로 끌어서 <b>아프리카</b> 옆에 붙여 보세요!',
+    hint: '남아메리카를 끌어 보세요', card: ['퍼즐처럼 딱 맞아요!', '남아메리카의 오른쪽 바닷가와 아프리카의 왼쪽 바닷가는 모양이 퍼즐처럼 맞아요.<br>땅과 바다가 만나는 이 선을 <b>해안선</b>이라고 해요. 베게너는 이것을 보고 "대륙은 원래 하나였다!"고 생각했어요.'] },
+  { layer: 'show-fossil', coach: '<b>증거 2 · 화석</b><br>초록 도마뱀은 <b>메소사우루스</b> 화석이에요. 바다 건너 두 대륙에 있죠? <b>대륙 모으기</b>를 눌러 보세요!',
+    hint: '화석이 어디 있나 찾아보세요', card: ['화석이 한 무리로 모였어요!', '메소사우루스는 민물에 살던 작은 파충류라 넓은 바다를 헤엄쳐 건널 수 없어요.<br>그런데도 남아메리카와 아프리카 두 곳에서 화석이 나와요. 옛날에 두 땅이 <b>붙어 있었기</b> 때문이에요.'] },
+  { layer: 'show-mount', coach: '<b>증거 3 · 산맥</b><br>갈색 세모는 <b>산맥</b>이에요. 북아메리카와 유럽에 끊어져 있어요. <b>대륙 모으기</b>를 눌러 보세요!',
+    hint: '끊어진 산맥을 찾아보세요', card: ['산맥이 한 줄로 이어졌어요!', '북아메리카의 산맥과 유럽의 산맥은 바위 종류가 같아요.<br>대륙을 붙이면 끊어졌던 산맥이 <b>한 줄로</b> 쭉 이어져요.'] },
+  { layer: 'show-ice', coach: '<b>증거 4 · 빙하 흔적</b><br>파란 화살표는 <b>빙하가 바위를 긁은 자국</b>이에요. 지금은 더운 곳에도 있어요! <b>대륙 모으기</b>를 눌러 보세요!',
+    hint: '파란 자국이 어디 있나 보세요', card: ['자국이 한 곳에서 퍼져 나가요!', '지금은 더운 아프리카와 인도에도 빙하 자국이 있어요.<br>대륙을 모으면 남쪽 땅들이 <b>남극 가까이</b> 모이고, 자국이 한가운데에서 퍼져 나가요. 옛날엔 <b>큰 빙하 하나</b>가 이 땅들을 덮고 있었어요.'] },
+];
+const tabs = [...document.querySelectorAll('.tab')];
+let cur = 0, busy = false;
+function show(i) {
+  cur = i; busy = false;
+  tabs.forEach((t, j) => t.classList.toggle('on', j === i));
+  $('#card').classList.remove('on');
+  const quiz = i === 4;
+  $('#play').style.display = quiz ? 'none' : '';
+  $('#quiz').style.display = quiz ? 'block' : 'none';
+  $('#score').style.display = 'none';
+  if (quiz) { $('#coach').innerHTML = '<b>대륙 이동 퀴즈</b><br>알맞은 답을 눌러 보세요!'; makeQuiz(); return; }
+  const s = STEPS[i];
+  $('#coach').innerHTML = s.coach; $('#hint').textContent = s.hint; $('#hint').style.display = '';
+  $('#map').setAttribute('class', s.layer); $('#stage').classList.remove('ice-done');
+  setAll(false);
+  C.sa.g.classList.toggle('grab', i === 0);
+  $('#go').hidden = i === 0; $('#go').textContent = '대륙 모으기';
+}
+function done(i) {
+  const [h, b] = STEPS[i].card;
+  $('#card').innerHTML = `<h3>${h}</h3>${b}`; $('#card').classList.add('on');
+  $('#hint').style.display = 'none';
+  setTimeout(() => $('#card').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 200);
+  if (!tabs[i].classList.contains('done')) { tabs[i].classList.add('done'); confetti(); sfx.win(); } else sfx.good();
+}
+tabs.forEach((t, i) => t.onclick = () => show(i));
+$('#reset').onclick = () => show(cur);
+$('#go').onclick = () => {
+  if (busy) return;
+  if ($('#go').textContent === '다시 떨어뜨리기') { show(cur); return; }
+  busy = true; setAll(true); $('#go').textContent = '다시 떨어뜨리기';
+  if (cur === 3) $('#stage').classList.add('ice-done');
+  setTimeout(() => { busy = false; done(cur); }, 1500);
+};
+
+// 남아메리카 끌기 (증거 1)
+const svg = $('#map');
+function toSvg(e) { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
+let drag = null;
+C.sa.g.addEventListener('pointerdown', e => {
+  if (cur !== 0 || !C.sa.g.classList.contains('grab')) return;
+  const p = toSvg(e); drag = { x: p.x - C.sa.pos[0], y: p.y - C.sa.pos[1] };
+  C.sa.g.classList.add('drag'); C.sa.g.setPointerCapture(e.pointerId);
+});
+C.sa.g.addEventListener('pointermove', e => { if (!drag) return; const p = toSvg(e); place('sa', p.x - drag.x, p.y - drag.y); });
+C.sa.g.addEventListener('pointerup', () => {
+  if (!drag) return; drag = null; C.sa.g.classList.remove('drag');
+  const [tx, ty] = C.af.now, [x, y] = C.sa.pos;
+  if (Math.hypot(x - tx, y - ty) < 45) { place('sa', tx, ty); C.sa.g.classList.remove('grab'); done(0); }
+  else if (x > -60) { sfx.bad(); toast('조금 더 맞춰 볼까요?'); }
+});
+
+// ── 퀴즈 ──
+const QUIZ = [
+  ['아주 먼 옛날, 모든 대륙이 하나로 붙어 있던 큰 땅의 이름은?', ['판게아', '태평양', '남극'], 0, '모든 대륙이 붙어 있던 땅은 판게아예요.'],
+  ['남아메리카와 해안선이 퍼즐처럼 맞는 대륙은?', ['아시아', '아프리카', '오스트레일리아'], 1, '남아메리카와 아프리카의 해안선이 딱 맞아요.'],
+  ['메소사우루스 화석이 바다 건너 두 대륙에서 나오는 까닭은?', ['메소사우루스가 바다를 헤엄쳐 건너서', '옛날에 두 대륙이 붙어 있어서', '바람에 날아가서'], 1, '메소사우루스는 넓은 바다를 못 건너요. 두 땅이 붙어 있었어요.'],
+  ['지금은 더운 아프리카에 빙하 자국이 있는 까닭은?', ['옛날엔 남극 가까이 모여 있어서', '어제 눈이 많이 와서', '빙하가 하늘을 날아와서'], 0, '옛날엔 남쪽 땅들이 남극 가까이 모여 큰 빙하에 덮여 있었어요.'],
+  ['대륙은 지금도 움직이고 있을까요?', ['아니요, 이제 멈췄어요', '네, 아주 천천히 움직여요'], 1, '1년에 손톱이 자라는 만큼 아주 천천히 움직여요.'],
+];
+let score = 0, answered = 0;
+function makeQuiz() {
+  score = 0; answered = 0; const box = $('#quiz'); box.innerHTML = '';
+  QUIZ.forEach(([q, opts, ans, why], qi) => {
+    const div = document.createElement('div'); div.className = 'q';
+    div.innerHTML = `<h3>${qi + 1}. ${q}</h3><div class="opts"></div><div class="why">${why}</div>`;
+    let tried = false, solved = false;
+    opts.forEach((o, oi) => {
+      const b = document.createElement('button'); b.className = 'opt'; b.textContent = o;
+      b.onclick = () => {
+        if (solved) return;
+        if (oi === ans) {
+          solved = true; b.classList.add('right'); div.querySelector('.why').classList.add('on'); sfx.good();
+          if (!tried) score++; answered++;
+          if (answered === QUIZ.length) finishQuiz();
+        } else { tried = true; b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong'); sfx.bad(); }
+      };
+      div.querySelector('.opts').append(b);
+    });
+    box.append(div);
+  });
+}
+function finishQuiz() {
+  const s = $('#score');
+  s.innerHTML = `한 번에 맞힌 문제 : ${score}개 / ${QUIZ.length}개<br>${score === QUIZ.length ? '대륙 이동 박사님이에요!' : '증거 4가지를 다시 보고 또 도전해 봐요!'}`;
+  s.style.display = 'block'; s.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  tabs[4].classList.add('done'); confetti(); sfx.win();
+}
+
+show(0);
+</script>
+</body>
+</html>
